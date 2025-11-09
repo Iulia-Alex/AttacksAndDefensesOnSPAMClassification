@@ -2,10 +2,10 @@
 
 ## Project Overview
 
-This project implements adversarial attacks and defense mechanisms for a spam detection classification task. The goal is to explore the vulnerabilities of machine learning models and improve their robustness against adversarial examples.
+This project implements adversarial attacks and defense mechanisms for a spam detection classification task. The goal is to explore the vulnerabilities of machine learning models and improve their robustness against adversarial attacks.
 
 ### Configuration
-- **Application**: Spam Detection (Email/SMS classification)
+- **Application**: Spam Detection (SMS classification)
 - **Attacks**: 
   1. Projected Gradient Descent (PGD)
   2. Synonym Substitution Attack
@@ -21,9 +21,9 @@ spam-detection-adversarial/
 │   └── spam.csv                    # Dataset file
 ├── models/
 │   ├── baseline_model.py           # LSTM-based spam classifier
-│   ├── baseline_model.pth          # Trained baseline model (generated)
-│   ├── adversarial_training_model.pth  # Defended model (generated)
-│   └── defensive_distillation_model.pth # Defended model (generated)
+│   ├── baseline_model.pth          # Trained baseline model
+│   ├── adversarial_training_model.pth  # Defended model
+│   └── defensive_distillation_model.pth # Defended model
 ├── attacks/
 │   ├── pgd.py                      # PGD attack implementation
 │   └── synonym_substitution.py     # Synonym substitution attack
@@ -32,7 +32,8 @@ spam-detection-adversarial/
 │   └── defensive_distillation.py   # Defensive distillation defense
 ├── utils/
 │   ├── data_loader.py              # Data loading and preprocessing
-│   └── evaluation.py               # Evaluation utilities
+│   └── visualization.py            # Evaluation graphics
+│   └── visualization_extra.py      # More evaluation graphics
 ├── train_baseline.py               # Script to train baseline model
 ├── evaluate_attacks.py             # Script to evaluate attacks
 ├── evaluate_defenses.py            # Script to evaluate defenses
@@ -46,8 +47,7 @@ spam-detection-adversarial/
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repo-url>
-cd spam-detection-adversarial
+git clone https://github.com/Iulia-Alex/AttacksAndDefensesOnSPAMClassification.git
 ```
 
 ### 2. Create Virtual Environment
@@ -74,22 +74,25 @@ python -c "import nltk; nltk.download('wordnet'); nltk.download('omw-1.4')"
 Place your spam detection dataset in the `data/` directory as `spam.csv`. The dataset should have the following format:
 
 ```csv
-text,label
-"Congratulations! You've won $1000",spam
-"Hey, are we still meeting tomorrow?",ham
+label text
+spam  Congratulations! You've won $1000
+ham Hey, are we still meeting tomorrow?
 ...
 ```
 
 **Dataset Recommendations**:
-- [SMS Spam Collection](https://www.kaggle.com/datasets/uciml/sms-spam-collection-dataset)
-- [Enron Email Dataset](https://www.kaggle.com/datasets/wcukierski/enron-email-dataset)
+
+```bash
+wget https://archive.ics.uci.edu/ml/machine-learning-databases/00228/smsspamcollection.zip -O data/spam.zip
+unzip data/spam.zip -d data/
+```
 
 ## Running the Project
 
 ### Quick Start - Run Full Pipeline
 
 ```bash
-python main.py
+python3 main.py
 ```
 
 This will:
@@ -190,7 +193,7 @@ The attack:
 
 - **Method**: Train with mixture of clean and adversarial examples
 - **Mix Ratio**: 50% adversarial, 50% clean examples per batch
-- **Adversarial Generation**: On-the-fly PGD attacks during training
+- **Adversarial Generation**: PGD attacks during training
 - **Training Epochs**: 15 (fine-tuning from baseline)
 - **Learning Rate**: 0.0001
 
@@ -212,75 +215,9 @@ For each model and attack combination, we measure:
 3. **Attack Success Rate**: Percentage of correctly classified examples that were fooled
 4. **Robustness Improvement**: Increase in adversarial accuracy compared to baseline
 
-## Expected Results
-
-### Baseline Model
-- Clean Accuracy: ~95-98%
-- PGD Adversarial Accuracy: ~30-50%
-- Synonym Adversarial Accuracy: ~60-75%
-
-### Adversarial Training
-- Clean Accuracy: ~92-95% (slight drop)
-- PGD Adversarial Accuracy: ~70-85% (significant improvement)
-- Better robustness to gradient-based attacks
-
-### Defensive Distillation
-- Clean Accuracy: ~93-96% (slight drop)
-- PGD Adversarial Accuracy: ~60-75% (moderate improvement)
-- Smoother decision boundaries
-
-## Comparison with Official Implementations
-
-To compare with official implementations, you can use:
-
-1. **For PGD**: [Foolbox](https://github.com/bethgelab/foolbox) or [Adversarial Robustness Toolbox (ART)](https://github.com/Trusted-AI/adversarial-robustness-toolbox)
-2. **For TextAttack**: [TextAttack library](https://github.com/QData/TextAttack) for text-based attacks
-
-Example comparison:
-```python
-# Install: pip install foolbox
-import foolbox as fb
-
-# Wrap your model
-fmodel = fb.PyTorchModel(model, bounds=(0, 1))
-
-# Run official PGD
-attack = fb.attacks.LinfPGD()
-adversarials = attack(fmodel, images, labels, epsilons=[0.1])
-```
-
-## Visualization Examples
-
-The project includes visualization of:
-
-1. **Training curves**: Loss and accuracy over epochs
-2. **Attack success rates**: Bar charts comparing different attacks
-3. **Example adversarial texts**: Side-by-side comparison of original vs adversarial
-4. **Robustness curves**: Accuracy vs perturbation budget (epsilon)
-
-## Troubleshooting
-
-### Issue: CUDA out of memory
-- **Solution**: Reduce batch size in `train_baseline.py` (line 15)
-
-### Issue: Synonym attack too slow
-- **Solution**: Reduce `num_samples` in `evaluate_synonym_attack` or `max_substitutions`
-
-### Issue: Poor baseline accuracy
-- **Solution**: 
-  - Increase training epochs
-  - Check data quality and preprocessing
-  - Adjust model hyperparameters (hidden_dim, num_layers)
-
-### Issue: Models not improving with defenses
-- **Solution**: 
-  - Increase defense training epochs
-  - Adjust mix_ratio (adversarial training) or temperature (distillation)
-  - Ensure attack parameters match between evaluation and training
-
 ## Citation
 
-If you use this code, please cite the original papers:
+Original papers:
 
 **PGD Attack**:
 ```
@@ -298,20 +235,10 @@ In 2016 IEEE Symposium on Security and Privacy (SP).
 
 ## Team Information
 
-- **Team Members**: [Your Names]
-- **Course**: [Course Name]
-- **Date**: [Date]
+- **Team Members**: Diana-Roxana Bratu, Iulia-Alexandra Orvas
+- **Course**: Artificial Intelligence 3
+- **Date**: 12th of November 2025
 
 ## License
 
-This project is for educational purposes as part of [Course Name].
-
-## Acknowledgments
-
-- Dataset: [Dataset Source]
-- Framework: PyTorch
-- NLP Tools: NLTK, WordNet
-
----
-
-For questions or issues, please open an issue on GitHub or contact [your-email].
+This project is for educational purposes as part of Artificial Intelligence 3 course.

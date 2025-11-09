@@ -210,76 +210,6 @@ def plot_confusion_matrices(model, data, device, save_path='results/confusion_ma
     print(f"Confusion matrices saved to {save_path}")
     plt.show()
 
-
-def visualize_embedding_space(model, data, device, save_path='results/embedding_visualization.png'):
-    """
-    Visualize clean and adversarial embeddings using t-SNE
-    """
-    from attacks.pgd import PGDAttack
-    
-    model.eval()
-    
-    # Sample data
-    n_samples = 300
-    test_data = torch.LongTensor(data['X_test'][:n_samples]).to(device)
-    test_labels = torch.LongTensor(data['y_test'][:n_samples]).to(device)
-    
-    # Get clean embeddings
-    with torch.no_grad():
-        clean_embeddings = model.embedding(test_data)
-        clean_embeddings_flat = clean_embeddings.mean(dim=1).cpu().numpy()
-    
-    # Get adversarial embeddings
-    pgd = PGDAttack(model, epsilon=0.1, alpha=0.01, num_iter=40)
-    adv_embeddings = pgd.attack(test_data, test_labels)
-    adv_embeddings_flat = adv_embeddings.mean(dim=1).cpu().numpy()
-    
-    # Combine for t-SNE
-    all_embeddings = np.vstack([clean_embeddings_flat, adv_embeddings_flat])
-    
-    # Apply t-SNE
-    print("Computing t-SNE projection (this may take a minute)...")
-    tsne = TSNE(n_components=2, random_state=42, perplexity=30)
-    embeddings_2d = tsne.fit_transform(all_embeddings)
-    
-    clean_2d = embeddings_2d[:n_samples]
-    adv_2d = embeddings_2d[n_samples:]
-    
-    labels = test_labels.cpu().numpy()
-    
-    # Plot
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-    
-    # Clean embeddings
-    for label, color, name in [(0, '#2ecc71', 'Ham'), (1, '#e74c3c', 'Spam')]:
-        mask = labels == label
-        ax1.scatter(clean_2d[mask, 0], clean_2d[mask, 1], 
-                   c=color, label=name, alpha=0.6, s=50, edgecolors='black', linewidth=0.5)
-    
-    ax1.set_title('Clean Embeddings (t-SNE)', fontsize=14, fontweight='bold')
-    ax1.set_xlabel('t-SNE Component 1', fontsize=12)
-    ax1.set_ylabel('t-SNE Component 2', fontsize=12)
-    ax1.legend(fontsize=12)
-    ax1.grid(True, alpha=0.3)
-    
-    # Adversarial embeddings
-    for label, color, name in [(0, '#2ecc71', 'Ham'), (1, '#e74c3c', 'Spam')]:
-        mask = labels == label
-        ax2.scatter(adv_2d[mask, 0], adv_2d[mask, 1], 
-                   c=color, label=name, alpha=0.6, s=50, edgecolors='black', linewidth=0.5)
-    
-    ax2.set_title('Adversarial Embeddings (t-SNE, PGD ε=0.1)', fontsize=14, fontweight='bold')
-    ax2.set_xlabel('t-SNE Component 1', fontsize=12)
-    ax2.set_ylabel('t-SNE Component 2', fontsize=12)
-    ax2.legend(fontsize=12)
-    ax2.grid(True, alpha=0.3)
-    
-    plt.tight_layout()
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    print(f"Embedding visualization saved to {save_path}")
-    plt.show()
-
-
 def plot_perturbation_analysis(model, data, device, save_path='results/perturbation_analysis.png'):
     """
     Analyze perturbation characteristics
@@ -490,13 +420,10 @@ def generate_all_visualizations():
     print("\n[4] Creating confusion matrices...")
     plot_confusion_matrices(baseline_model, data, device, 'results/confusion_matrices.png')
     
-    print("\n[5] Visualizing embedding space...")
-    visualize_embedding_space(baseline_model, data, device, 'results/embedding_visualization.png')
-    
-    print("\n[6] Analyzing perturbations...")
+    print("\n[5] Analyzing perturbations...")
     plot_perturbation_analysis(baseline_model, data, device, 'results/perturbation_analysis.png')
     
-    print("\n[7] Creating comparison table...")
+    print("\n[6] Creating comparison table...")
     create_attack_comparison_table(results_dict, 'results/attack_comparison_table.png')
     
     print("\n" + "="*80)
@@ -505,9 +432,8 @@ def generate_all_visualizations():
     print("\nGenerated files:")
     print("  1. results/comprehensive_analysis.png - 6-panel figure")
     print("  2. results/confusion_matrices.png - Clean vs Adversarial confusion")
-    print("  3. results/embedding_visualization.png - t-SNE visualization")
-    print("  4. results/perturbation_analysis.png - Perturbation magnitude analysis")
-    print("  5. results/attack_comparison_table.png - Comparison table")
+    print("  3. results/perturbation_analysis.png - Perturbation magnitude analysis")
+    print("  4. results/attack_comparison_table.png - Comparison table")
 
 if __name__ == '__main__':
     generate_all_visualizations()

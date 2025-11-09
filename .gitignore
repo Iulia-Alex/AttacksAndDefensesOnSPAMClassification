@@ -17,9 +17,9 @@ data/*.csv
 data/*.txt
 
 # Results and plots
-results/
-*.png
-*.jpg
+# results/
+# *.png
+# *.jpg
 
 # IDE
 .vscode/
