@@ -1,4 +1,4 @@
-# Spam Detection with Adversarial Attacks and Defenses
+# Adversarial Attacks and Defenses on Spam Detection Task 
 
 ## Project Overview
 
