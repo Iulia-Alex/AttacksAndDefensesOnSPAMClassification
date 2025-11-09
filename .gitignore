@@ -9,11 +9,11 @@ env/
 ENV/
 
 # Model checkpoints
-models/*.pth
-models/*.pt
+# models/*.pth
+# models/*.pt
 
 # Data files (if large)
-data/*.csv
+# data/*.csv
 data/*.txt
 
 # Results and plots
